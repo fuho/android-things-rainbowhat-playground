@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import com.google.android.things.contrib.driver.button.ButtonInputDriver;
+import com.google.android.things.contrib.driver.ht16k33.AlphanumericDisplay;
 import com.google.android.things.contrib.driver.rainbowhat.RainbowHat;
 import com.google.android.things.pio.Gpio;
 import com.google.android.things.pio.PeripheralManagerService;
@@ -47,6 +48,7 @@ public class ButtonActivity extends Activity {
 
     private Gpio mLedRGpio, mLedGGpio;
     private ButtonInputDriver mButtonAInputDriver, mButtonBInputDriver;
+    private AlphanumericDisplay mAlphanumericDisplay;
 
 
     @Override
@@ -67,6 +69,9 @@ public class ButtonActivity extends Activity {
             mButtonAInputDriver.register();
             mButtonBInputDriver = RainbowHat.createButtonBInputDriver(KEYCODE_B);
             mButtonBInputDriver.register();
+            mAlphanumericDisplay = RainbowHat.openDisplay();
+            mAlphanumericDisplay.setEnabled(true);
+            mAlphanumericDisplay.clear();
         } catch (IOException e) {
             Log.e(TAG, "Error configuring GPIO pins", e);
         }
@@ -74,13 +79,24 @@ public class ButtonActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        displayText("");
         switch (keyCode){
             case KEYCODE_A:
+                displayText("LedA");
                 return setLedValue(mLedRGpio, true);
             case KEYCODE_B:
+                displayText("LedB");
                 return setLedValue(mLedGGpio, true);
             default:
                 return false;
+        }
+    }
+
+    private void displayText(final String text) {
+        try {
+            mAlphanumericDisplay.display(text);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
